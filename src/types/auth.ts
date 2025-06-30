@@ -20,3 +20,14 @@ export interface AuthResponse {
   message?: string;
   token?: string;
 }
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterCredentials {
+  email: string;
+  pasword: string;
+  full_name: string;
+}

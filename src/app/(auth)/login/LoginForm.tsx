@@ -1,34 +1,49 @@
 "use client";
 import React, { useState } from "react";
 import { BookOpen, User, Lock, Eye, EyeOff } from "lucide-react";
+import authService from "@/services/authService";
+import { useRouter } from "next/navigation";
 
 const LoginForm = () => {
-  const [username, setUsername] = useState("");
+  const [email, setemail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const auth = authService();
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  const router = useRouter();
+
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setErrorMessage("");
 
-    if (!username || !password) {
+    if (!email || !password) {
       setErrorMessage("Vui lòng nhập đầy đủ thông tin");
       return;
     }
 
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      const userData = { email, password };
+      const response = await auth.login(userData);
+      console.log("Đăng nhập thành công:", response);
+      router.push("/");
+    } catch (error) {
+      console.error("Lỗi đăng nhập:", error);
+
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : typeof error === "string"
+          ? error
+          : "Đăng nhập không thành công"
+      );
+    } finally {
       setIsLoading(false);
-      if (username === "admin" && password === "admin") {
-        alert("Đăng nhập thành công!");
-      } else {
-        setErrorMessage("Tên đăng nhập hoặc mật khẩu không đúng");
-      }
-    }, 1500);
+    }
   };
 
   return (
@@ -63,7 +78,7 @@ const LoginForm = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label
-                htmlFor="username"
+                htmlFor="email"
                 className="block text-sm font-semibold text-gray-700"
               >
                 Tên đăng nhập
@@ -73,12 +88,12 @@ const LoginForm = () => {
                   <User className="h-5 w-5 text-amber-500" />
                 </div>
                 <input
-                  id="username"
+                  id="email"
                   type="text"
                   className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-100 transition-all duration-200 bg-white/80"
                   placeholder="Nhập tên đăng nhập"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={email}
+                  onChange={(e) => setemail(e.target.value)}
                   required
                 />
               </div>
